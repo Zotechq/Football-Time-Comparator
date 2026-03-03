@@ -1,11 +1,13 @@
 // flashscore-scraper-kenya-time-filtered.js
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
+const path = require('path');
 
 class FlashscoreScraper {
     constructor() {
         this.browser = null;
         this.page = null;
+        this.dataDir = path.join(__dirname, 'data', 'flashscore');
     }
 
     async delay(ms) {
@@ -16,6 +18,9 @@ class FlashscoreScraper {
         console.log('='.repeat(80));
         console.log('⚽ FLASHSCORE MATCH SCRAPER - KENYA TIME');
         console.log('='.repeat(80));
+
+        // Create data directory if it doesn't exist
+        await fs.mkdir(this.dataDir, { recursive: true });
 
         this.browser = await puppeteer.launch({
             headless: false,
@@ -217,9 +222,7 @@ class FlashscoreScraper {
     }
 
     async saveMatches(matches) {
-        const filename = `flashscore_matches_kenya_${Date.now()}.json`;
-
-        // Sort by time
+        // Sort matches
         const sorted = [...matches].sort((a, b) => a.time.localeCompare(b.time));
 
         // Group by hour for JSON
@@ -234,7 +237,7 @@ class FlashscoreScraper {
             });
         });
 
-        await fs.writeFile(filename, JSON.stringify({
+        const data = {
             timestamp: new Date().toISOString(),
             url: 'https://www.flashscore.co.ke/football/',
             timezone: 'East Africa Time (EAT / UTC+3)',
@@ -246,9 +249,79 @@ class FlashscoreScraper {
             },
             matchesByHour: byHour,
             allMatches: sorted
-        }, null, 2));
+        };
 
-        console.log(`\n💾 Matches saved to ${filename}`);
+        // 1. Save latest version (always overwrites)
+        const latestFile = path.join(this.dataDir, 'flashscore_latest.json');
+        await fs.writeFile(latestFile, JSON.stringify(data, null, 2));
+        console.log(`\n💾 Latest matches saved to ${latestFile}`);
+
+        // 2. Save dated version (for history)
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        const historyDir = path.join(this.dataDir, 'history', year.toString(), month);
+        await fs.mkdir(historyDir, { recursive: true });
+
+        const historyFile = path.join(historyDir, `flashscore_${year}-${month}-${day}.json`);
+        await fs.writeFile(historyFile, JSON.stringify(data, null, 2));
+        console.log(`💾 History saved to ${historyFile}`);
+
+        // 3. Clean up old files (older than 7 days)
+        await this.cleanupOldFiles();
+    }
+
+    async cleanupOldFiles() {
+        try {
+            const historyDir = path.join(this.dataDir, 'history');
+            const now = Date.now();
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+            // Walk through year/month folders
+            const years = await fs.readdir(historyDir).catch(() => []);
+
+            for (const year of years) {
+                const yearPath = path.join(historyDir, year);
+                const months = await fs.readdir(yearPath).catch(() => []);
+
+                for (const month of months) {
+                    const monthPath = path.join(yearPath, month);
+                    const files = await fs.readdir(monthPath).catch(() => []);
+
+                    for (const file of files) {
+                        if (file.endsWith('.json')) {
+                            const filePath = path.join(monthPath, file);
+                            const stats = await fs.stat(filePath);
+
+                            // If file is older than 7 days, delete it
+                            if (now - stats.mtimeMs > sevenDays) {
+                                await fs.unlink(filePath);
+                                console.log(`🧹 Deleted old file: ${filePath}`);
+                            }
+                        }
+                    }
+
+                    // Remove empty month folder
+                    const remaining = await fs.readdir(monthPath).catch(() => []);
+                    if (remaining.length === 0) {
+                        await fs.rmdir(monthPath);
+                        console.log(`📁 Removed empty folder: ${monthPath}`);
+                    }
+                }
+
+                // Remove empty year folder
+                const remainingMonths = await fs.readdir(yearPath).catch(() => []);
+                if (remainingMonths.length === 0) {
+                    await fs.rmdir(yearPath);
+                    console.log(`📁 Removed empty folder: ${yearPath}`);
+                }
+            }
+        } catch (error) {
+            // Silently handle cleanup errors (don't crash the program)
+            console.log(`⚠️ Cleanup warning: ${error.message}`);
+        }
     }
 
     async verifyExtraction() {
@@ -321,6 +394,7 @@ class FlashscoreScraper {
             console.log(`📊 Extracted matches: ${matches.length}`);
             console.log(`✅ Extraction rate: ${Math.round(matches.length/finalStats.valid*100)}%`);
             console.log(`⏰ Timezone: East Africa Time (EAT / UTC+3) - Kenya local time`);
+            console.log(`📁 Data directory: ${this.dataDir}`);
 
             if (finalStats.finished > 0) {
                 console.log(`\n🗑️  Filtered out ${finalStats.finished} finished matches (FRO, FT, etc.)`);

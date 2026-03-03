@@ -1,6 +1,7 @@
-// odibets_scraper.js - FIXED LOOP VERSION
+// odibets_scraper.js - FIXED LOOP VERSION with organized storage
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
+const path = require('path');
 
 class OdibetsScraper {
     constructor() {
@@ -9,6 +10,7 @@ class OdibetsScraper {
         this.baseUrl = 'https://www.odibets.com/sports/soccer';
         this.allMatches = [];
         this.startTime = Date.now();
+        this.dataDir = path.join(__dirname, 'data', 'odibets');
     }
 
     async delay(ms) {
@@ -19,6 +21,9 @@ class OdibetsScraper {
         console.log('='.repeat(80));
         console.log('⚽ ODIBETS SOCCER MATCH SCRAPER - FIXED LOOP');
         console.log('='.repeat(80));
+
+        // Create data directory if it doesn't exist
+        await fs.mkdir(this.dataDir, { recursive: true });
 
         this.browser = await puppeteer.launch({
             headless: false,
@@ -189,6 +194,108 @@ class OdibetsScraper {
         return matches;
     }
 
+    async saveMatches(matches) {
+        // Prepare data
+        const data = {
+            timestamp: new Date().toISOString(),
+            totalMatches: matches.length,
+            matches: matches
+        };
+
+        // 1. Save latest version (always overwrites)
+        const latestFile = path.join(this.dataDir, 'odibets_latest.json');
+        await fs.writeFile(latestFile, JSON.stringify(data, null, 2));
+        console.log(`\n💾 Latest matches saved to ${latestFile}`);
+
+        // 2. Save dated version (for history)
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        const historyDir = path.join(this.dataDir, 'history', year.toString(), month);
+        await fs.mkdir(historyDir, { recursive: true });
+
+        const historyFile = path.join(historyDir, `odibets_${year}-${month}-${day}.json`);
+        await fs.writeFile(historyFile, JSON.stringify(data, null, 2));
+        console.log(`💾 History saved to ${historyFile}`);
+
+        // 3. Save CSV version
+        const csvFilename = path.join(this.dataDir, `odibets_${year}-${month}-${day}.csv`);
+        let csvContent = 'Home Team,Away Team,Kickoff,Date\n';
+        matches.forEach(m => {
+            csvContent += `${m.home},${m.away},${m.kickoff},${m.date}\n`;
+        });
+        await fs.writeFile(csvFilename, csvContent);
+        console.log(`💾 CSV saved to ${csvFilename}`);
+
+        // 4. Clean up old files (older than 7 days)
+        await this.cleanupOldFiles();
+    }
+
+    async cleanupOldFiles() {
+        try {
+            const historyDir = path.join(this.dataDir, 'history');
+            const now = Date.now();
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+            // Check if history directory exists
+            const historyExists = await fs.access(historyDir).then(() => true).catch(() => false);
+            if (!historyExists) return;
+
+            // Walk through year/month folders
+            const years = await fs.readdir(historyDir);
+
+            for (const year of years) {
+                const yearPath = path.join(historyDir, year);
+                const yearStat = await fs.stat(yearPath);
+                if (!yearStat.isDirectory()) continue;
+
+                const months = await fs.readdir(yearPath);
+
+                for (const month of months) {
+                    const monthPath = path.join(yearPath, month);
+                    const monthStat = await fs.stat(monthPath);
+                    if (!monthStat.isDirectory()) continue;
+
+                    const files = await fs.readdir(monthPath);
+                    let deletedCount = 0;
+
+                    for (const file of files) {
+                        if (file.endsWith('.json') || file.endsWith('.csv')) {
+                            const filePath = path.join(monthPath, file);
+                            const stats = await fs.stat(filePath);
+
+                            // If file is older than 7 days, delete it
+                            if (now - stats.mtimeMs > sevenDays) {
+                                await fs.unlink(filePath);
+                                deletedCount++;
+                                console.log(`🧹 Deleted old file: ${filePath}`);
+                            }
+                        }
+                    }
+
+                    // Remove empty month folder
+                    const remaining = await fs.readdir(monthPath);
+                    if (remaining.length === 0) {
+                        await fs.rmdir(monthPath);
+                        console.log(`📁 Removed empty folder: ${monthPath}`);
+                    }
+                }
+
+                // Remove empty year folder
+                const remainingMonths = await fs.readdir(yearPath);
+                if (remainingMonths.length === 0) {
+                    await fs.rmdir(yearPath);
+                    console.log(`📁 Removed empty folder: ${yearPath}`);
+                }
+            }
+        } catch (error) {
+            // Silently handle cleanup errors (don't crash the program)
+            console.log(`⚠️ Cleanup warning: ${error.message}`);
+        }
+    }
+
     async run() {
         try {
             await this.init();
@@ -223,27 +330,8 @@ class OdibetsScraper {
 
             console.log('='.repeat(80));
 
-            // Save to file
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
-            const filename = `odibets_matches_${timestamp}.json`;
-
-            await fs.writeFile(filename, JSON.stringify({
-                timestamp: new Date().toISOString(),
-                totalMatches: allMatches.length,
-                matches: allMatches
-            }, null, 2));
-
-            console.log(`\n💾 Saved ${allMatches.length} matches to ${filename}`);
-
-            // Save as CSV
-            const csvFilename = filename.replace('.json', '.csv');
-            let csvContent = 'Home Team,Away Team,Kickoff,Date\n';
-            allMatches.forEach(m => {
-                csvContent += `${m.home},${m.away},${m.kickoff},${m.date}\n`;
-            });
-
-            await fs.writeFile(csvFilename, csvContent);
-            console.log(`💾 Saved ${allMatches.length} matches to ${csvFilename}`);
+            // Save matches with organized structure
+            await this.saveMatches(allMatches);
 
             console.log(`\n⏱️  Total time: ${Math.round((Date.now() - this.startTime)/1000)} seconds`);
 
