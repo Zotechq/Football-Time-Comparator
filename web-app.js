@@ -89,6 +89,6 @@ app.get('/api/conflicts', async (req, res) => {
     res.json(conflicts);
 });
 
-app.listen(PORT, () => {
-    console.log(`🌐 Web dashboard running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🌐 Web dashboard running at http://0.0.0.0:${PORT}`);
 });
