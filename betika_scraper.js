@@ -1,4 +1,4 @@
-// betika_scraper.js
+// betika_scraper.js - FINAL FIXED VERSION
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 
@@ -16,17 +16,16 @@ class BetikaScraper {
 
     async init() {
         console.log('='.repeat(80));
-        console.log('⚽ BETIKA SOCCER MATCH SCRAPER');
+        console.log('⚽ BETIKA SOCCER MATCH SCRAPER - FINAL');
         console.log('='.repeat(80));
 
         this.browser = await puppeteer.launch({
             headless: false,
-            defaultViewport: { width: 1366, height: 768 }
+            defaultViewport: { width: 1366, height: 768 },
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
         this.page = await this.browser.newPage();
-
-        await this.page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     }
 
     async navigateToSoccer() {
@@ -35,52 +34,48 @@ class BetikaScraper {
             waitUntil: 'networkidle2',
             timeout: 60000
         });
-
         console.log('✅ Page loaded');
-        await this.delay(8000); // Wait for dynamic content
-    }
-
-    async closePopupIfExists() {
-        try {
-            const closeButton = await this.page.$('button:contains("Close")');
-            if (closeButton) {
-                await closeButton.click();
-                console.log('✅ Closed popup');
-                await this.delay(2000);
-            }
-        } catch (error) {
-            // No popup
-        }
+        await this.delay(5000);
     }
 
     async scrollToLoadAll() {
         console.log('\n📜 Scrolling to load all matches...');
 
-        let previousHeight = 0;
+        let previousMatchCount = 0;
         let sameCount = 0;
+        let scrollAttempts = 0;
+        const maxScrollAttempts = 30;
 
-        while (sameCount < 3) {
-            // Scroll to bottom
-            previousHeight = await this.page.evaluate('document.body.scrollHeight');
-            await this.page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-            await this.delay(3000);
+        while (sameCount < 3 && scrollAttempts < maxScrollAttempts) {
+            scrollAttempts++;
 
-            const newHeight = await this.page.evaluate('document.body.scrollHeight');
+            // Count match containers
+            const matchCount = await this.page.evaluate(() => {
+                return document.querySelectorAll('[class*="match"]').length;
+            });
 
-            if (newHeight === previousHeight) {
+            console.log(`   Scroll ${scrollAttempts}: Found ${matchCount} match containers`);
+
+            if (matchCount === previousMatchCount) {
                 sameCount++;
-                console.log(`   No new content loaded (${sameCount}/3)`);
+                console.log(`   No new matches (${sameCount}/3)`);
             } else {
                 sameCount = 0;
-                console.log(`   Content height increased, continuing...`);
+                previousMatchCount = matchCount;
             }
+
+            await this.page.evaluate(() => {
+                window.scrollBy(0, 800);
+            });
+
+            await this.delay(2000);
         }
 
-        console.log('✅ Reached bottom of page');
+        console.log(`\n✅ Finished scrolling. Found ${previousMatchCount} match containers.`);
     }
 
     async extractMatches() {
-        console.log('\n📋 Extracting matches using Betika pattern...');
+        console.log('\n📋 Extracting matches...');
 
         const matches = await this.page.evaluate(() => {
             const results = [];
@@ -89,61 +84,38 @@ class BetikaScraper {
             const text = document.body.innerText;
             const lines = text.split('\n').filter(line => line.trim().length > 0);
 
-            // Process lines looking for the pattern:
-            // Line with • (league)
-            // Next line with date/time (DD/MM, HH:MM)
-            // Next line with home team (may end with ...)
-            // Next line with away team
-
             for (let i = 0; i < lines.length - 3; i++) {
-                const leagueLine = lines[i].trim();
-                const dateLine = lines[i + 1].trim();
-                const homeLine = lines[i + 2].trim();
-                const awayLine = lines[i + 3].trim();
+                // Look for pattern: League • LeagueName
+                const leagueMatch = lines[i].match(/(.+?)\s•\s(.+)/);
 
-                // Check if this is a match block
-                // 1. League line should contain • and not be too long
-                // 2. Date line should match DD/MM, HH:MM pattern
-                // 3. Home and away should be team names (not odds)
+                if (leagueMatch) {
+                    const league = lines[i].trim();
 
-                const dateMatch = dateLine.match(/(\d{2}\/\d{2}),?\s*(\d{2}:\d{2})/);
+                    // Next line should be date and time
+                    const dateTimeMatch = lines[i + 1].match(/(\d{2}\/\d{2}),\s*(\d{2}:\d{2})/);
 
-                if (leagueLine.includes('•') && dateMatch) {
-                    const date = dateMatch[1];
-                    const gmtTime = dateMatch[2]; // Original time (likely UTC/GMT)
+                    if (dateTimeMatch) {
+                        const date = dateTimeMatch[1];
+                        const time = dateTimeMatch[2]; // This is GMT
 
-                    // Clean home team name (remove trailing ...)
-                    const home = homeLine.replace(/\.\.\.$/, '').trim();
-                    const away = awayLine.trim();
+                        // Next two lines are home and away teams
+                        const home = lines[i + 2].trim();
+                        const away = lines[i + 3].trim();
 
-                    // Validate we have real team names
-                    if (home && away && home.length > 2 && away.length > 2) {
-                        // Check that these aren't odds lines
-                        if (!home.match(/^\d+\.\d+$/) && !away.match(/^\d+\.\d+$/)) {
-
-                            // Convert GMT to Kenya time (GMT+3)
-                            let kenyaTime = gmtTime;
-                            try {
-                                const [hours, minutes] = gmtTime.split(':').map(Number);
-                                let kenyaHours = hours + 3;
-                                if (kenyaHours >= 24) kenyaHours -= 24;
-                                kenyaTime = `${kenyaHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                            } catch (e) {
-                                // Keep original if conversion fails
-                            }
+                        // Validate team names (not odds, not too short)
+                        if (home && away &&
+                            !home.match(/^\d+\.\d+$/) &&
+                            !away.match(/^\d+\.\d+$/) &&
+                            home.length > 2 && away.length > 2) {
 
                             results.push({
                                 home: home,
                                 away: away,
-                                kickoff: kenyaTime, // Kenya time
-                                originalGmt: gmtTime, // Original for reference
+                                kickoff: time, // GMT time
                                 date: date,
-                                league: leagueLine,
+                                league: league,
                                 bookie: 'Betika'
                             });
-
-                            // Skip ahead 4 lines to avoid reprocessing
-                            i += 3;
                         }
                     }
                 }
@@ -163,18 +135,16 @@ class BetikaScraper {
 
         await fs.writeFile(filename, JSON.stringify({
             timestamp: new Date().toISOString(),
-            url: this.baseUrl,
             totalMatches: this.matches.length,
             matches: this.matches
         }, null, 2));
 
         console.log(`\n💾 Saved ${this.matches.length} matches to ${filename}`);
 
-        // Save as CSV
         const csvFilename = filename.replace('.json', '.csv');
-        let csvContent = 'Home Team,Away Team,Kickoff (EAT),Original GMT,Date,League,Bookie\n';
+        let csvContent = 'Home Team,Away Team,Kickoff (GMT),Date,League,Bookie\n';
         this.matches.forEach(m => {
-            csvContent += `${m.home},${m.away},${m.kickoff},${m.originalGmt},${m.date},"${m.league}",${m.bookie}\n`;
+            csvContent += `${m.home},${m.away},${m.kickoff},${m.date},"${m.league}",${m.bookie}\n`;
         });
 
         await fs.writeFile(csvFilename, csvContent);
@@ -209,7 +179,7 @@ class BetikaScraper {
         for (const date of sortedDates) {
             console.log(`\n📅 ${date} (${byDate[date].length} matches)`);
 
-            // Group by league within date
+            // Group by league
             const byLeague = {};
             byDate[date].forEach(m => {
                 if (!byLeague[m.league]) byLeague[m.league] = [];
@@ -222,7 +192,7 @@ class BetikaScraper {
                 console.log(`\n   🏆 ${league}`);
                 byLeague[league].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
                 byLeague[league].forEach(match => {
-                    console.log(`   ${globalIndex.toString().padStart(3)}. ${match.home.padEnd(30)} vs ${match.away.padEnd(30)} @ ${match.kickoff} (GMT: ${match.originalGmt})`);
+                    console.log(`   ${globalIndex.toString().padStart(3)}. ${match.home.padEnd(25)} vs ${match.away.padEnd(25)} @ ${match.kickoff} GMT`);
                     globalIndex++;
                 });
             }
@@ -236,7 +206,6 @@ class BetikaScraper {
         try {
             await this.init();
             await this.navigateToSoccer();
-            await this.closePopupIfExists();
             await this.scrollToLoadAll();
             await this.extractMatches();
             await this.displayMatches();
@@ -249,7 +218,6 @@ class BetikaScraper {
         } catch (error) {
             console.error('❌ Error:', error);
         } finally {
-            await this.delay(5000);
             await this.browser.close();
         }
     }

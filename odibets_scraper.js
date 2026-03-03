@@ -1,4 +1,4 @@
-// odibets-scraper-optimized.js
+// odibets_scraper.js - FIXED LOOP VERSION
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 
@@ -7,9 +7,8 @@ class OdibetsScraper {
         this.browser = null;
         this.page = null;
         this.baseUrl = 'https://www.odibets.com/sports/soccer';
-        this.allMatches = []; // Store all matches
-        this.peakVisibleMatches = 0;
-        this.finalVisibleMatches = 0;
+        this.allMatches = [];
+        this.startTime = Date.now();
     }
 
     async delay(ms) {
@@ -18,89 +17,134 @@ class OdibetsScraper {
 
     async init() {
         console.log('='.repeat(80));
-        console.log('⚽ ODIBETS SOCCER MATCH SCRAPER - OPTIMIZED');
+        console.log('⚽ ODIBETS SOCCER MATCH SCRAPER - FIXED LOOP');
         console.log('='.repeat(80));
 
         this.browser = await puppeteer.launch({
             headless: false,
-            defaultViewport: { width: 1366, height: 768 }
+            defaultViewport: { width: 1366, height: 768 },
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+            ]
         });
 
         this.page = await this.browser.newPage();
+        await this.page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     }
 
     async navigateToSoccer() {
         console.log('\n📡 Loading Odibets soccer page...');
-        await this.page.goto(this.baseUrl, {
-            waitUntil: 'networkidle2',
-            timeout: 60000
-        });
-
-        console.log('✅ Page loaded');
-        await this.delay(5000);
+        try {
+            await this.page.goto(this.baseUrl, {
+                waitUntil: 'networkidle2',
+                timeout: 60000
+            });
+            console.log('✅ Page loaded');
+            await this.delay(3000);
+        } catch (error) {
+            console.log(`⚠️ Navigation warning: ${error.message}`);
+            await this.delay(3000);
+        }
     }
 
     async getVisibleMatchCount() {
-        return await this.page.evaluate(() => {
-            return document.querySelectorAll('a.t').length;
-        });
+        try {
+            return await this.page.evaluate(() => {
+                return document.querySelectorAll('a.t').length;
+            });
+        } catch (error) {
+            return 0;
+        }
     }
 
-    async expandAllLeagues() {
-        console.log('\n🔍 Expanding all leagues to reveal matches...');
+    async expandLeaguesInBatches() {
+        console.log('\n🔍 Expanding leagues in batches (50 per batch)...');
 
-        let clickCount = 0;
+        let totalClicked = 0;
+        let batchCount = 0;
+        let previousMatchCount = 0;
+        let noProgressCount = 0;
+        const batchSize = 50;
+        const waitTime = 2000;
+        const maxBatches = 20; // Safety limit
 
-        // Scroll to load content
-        await this.page.evaluate(() => {
-            window.scrollBy(0, 500);
-        });
-        await this.delay(2000);
+        while (batchCount < maxBatches) {
+            batchCount++;
 
-        // Find and click ALL collapsed leagues in one go
-        const clicked = await this.page.evaluate(() => {
-            let count = 0;
-            const elements = document.querySelectorAll('div, span, h3, h4, h5, a');
+            const clicked = await this.page.evaluate((limit) => {
+                let count = 0;
+                const elements = document.querySelectorAll('div, span, h3, h4, h5, a');
 
-            elements.forEach(el => {
-                const text = el.innerText?.trim() || '';
-                const match = text.match(/(.+?)\s*\((\d+)\)$/);
+                elements.forEach(el => {
+                    if (count >= limit) return;
 
-                if (match && !text.includes('vs') && !text.includes(':')) {
-                    const leagueName = match[1].trim();
-                    const matchCount = parseInt(match[2]);
+                    const text = el.innerText?.trim() || '';
+                    const match = text.match(/(.+?)\s*\((\d+)\)$/);
 
-                    // Check if this league is already expanded
-                    let isExpanded = false;
-                    let parent = el.parentElement;
-                    if (parent) {
-                        let next = parent.nextElementSibling;
-                        for (let i = 0; i < 3 && next; i++) {
-                            if (next.querySelector('a.t')) {
+                    if (match && !text.includes('vs') && !text.includes(':')) {
+                        // Check if this league is already expanded
+                        let isExpanded = false;
+                        let parent = el.parentElement;
+                        if (parent) {
+                            let next = parent.nextElementSibling;
+                            if (next && next.querySelector('a.t')) {
                                 isExpanded = true;
-                                break;
                             }
-                            next = next.nextElementSibling;
+                        }
+
+                        if (!isExpanded) {
+                            try {
+                                el.scrollIntoView({ block: 'center' });
+                                el.click();
+                                count++;
+                            } catch (e) {}
                         }
                     }
+                });
 
-                    if (!isExpanded && matchCount > 0) {
-                        try {
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            el.click();
-                            count++;
-                        } catch (e) {}
-                    }
+                return count;
+            }, batchSize);
+
+            totalClicked += clicked;
+
+            // Show progress
+            process.stdout.write(`\r   Batch ${batchCount}: Clicked ${clicked} leagues (total: ${totalClicked})`);
+
+            // If no leagues clicked this batch, we're done
+            if (clicked === 0) {
+                console.log('\n   ✅ No more leagues to click');
+                break;
+            }
+
+            // Wait between batches
+            await this.delay(waitTime);
+
+            // Check match count every batch
+            const currentMatches = await this.getVisibleMatchCount();
+            process.stdout.write(` → ${currentMatches} matches`);
+
+            // Check if matches are still increasing
+            if (currentMatches === previousMatchCount) {
+                noProgressCount++;
+                if (noProgressCount >= 3) {
+                    console.log('\n   ✅ Match count stable for 3 batches, stopping');
+                    break;
                 }
-            });
+            } else {
+                noProgressCount = 0;
+                previousMatchCount = currentMatches;
+            }
+        }
 
-            return count;
-        });
+        console.log(`\n\n📊 Total leagues clicked: ${totalClicked}`);
 
-        console.log(`   ✅ Clicked ${clicked} leagues to expand`);
-        await this.delay(3000); // Wait for matches to load
+        // Final match count
+        const finalMatches = await this.getVisibleMatchCount();
+        console.log(`📊 Final match count: ${finalMatches}`);
 
-        return clicked;
+        return totalClicked;
     }
 
     async extractAllMatches() {
@@ -141,10 +185,7 @@ class OdibetsScraper {
         });
 
         const visibleCount = await this.getVisibleMatchCount();
-        this.finalVisibleMatches = visibleCount;
-
-        console.log(`   📊 Found ${matches.length} matches (site shows ${visibleCount})`);
-
+        console.log(`   ✅ Extracted ${matches.length} matches (site shows ${visibleCount})`);
         return matches;
     }
 
@@ -153,50 +194,34 @@ class OdibetsScraper {
             await this.init();
             await this.navigateToSoccer();
 
-            // Get initial match count
             const initialCount = await this.getVisibleMatchCount();
             console.log(`\n📊 Initially visible matches: ${initialCount}`);
 
-            // ONE expansion to reveal all matches
-            await this.expandAllLeagues();
+            // Expand leagues
+            await this.expandLeaguesInBatches();
 
-            // Extract ALL matches after expansion
+            // Short final wait
+            await this.delay(3000);
+
+            // Extract matches
             const allMatches = await this.extractAllMatches();
 
-            // Display results
-            console.log('\n' + '='.repeat(100));
+            // Display summary (first 20 matches)
+            console.log('\n' + '='.repeat(80));
             console.log(`📋 ODIBETS MATCHES - ${new Date().toLocaleDateString()}`);
-            console.log('='.repeat(100));
-            console.log(`📊 Site shows: ${this.finalVisibleMatches} matches`);
-            console.log(`📊 Extracted: ${allMatches.length} matches`);
-            console.log('-'.repeat(100));
+            console.log('='.repeat(80));
+            console.log(`📊 Total matches: ${allMatches.length}`);
+            console.log('-'.repeat(80));
 
-            // Group by date
-            const byDate = {};
-            allMatches.forEach(m => {
-                if (!byDate[m.date]) byDate[m.date] = [];
-                byDate[m.date].push(m);
+            allMatches.slice(0, 20).forEach((m, i) => {
+                console.log(`${(i+1).toString().padStart(3)}. ${m.home.padEnd(25)} vs ${m.away.padEnd(25)} @ ${m.kickoff} ${m.date}`);
             });
 
-            const sortedDates = Object.keys(byDate).sort((a, b) => {
-                const [dayA, monthA] = a.split('/').map(Number);
-                const [dayB, monthB] = b.split('/').map(Number);
-                if (monthA !== monthB) return monthA - monthB;
-                return dayA - dayB;
-            });
-
-            let globalIndex = 1;
-            for (const date of sortedDates) {
-                console.log(`\n📅 ${date} (${byDate[date].length} matches)`);
-                byDate[date].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-                byDate[date].forEach(match => {
-                    console.log(`${globalIndex.toString().padStart(3)}. ${match.home.padEnd(30)} vs ${match.away.padEnd(30)} @ ${match.kickoff}`);
-                    globalIndex++;
-                });
+            if (allMatches.length > 20) {
+                console.log(`   ... and ${allMatches.length - 20} more matches`);
             }
 
-            console.log('='.repeat(100));
-            console.log(`Total matches: ${allMatches.length}`);
+            console.log('='.repeat(80));
 
             // Save to file
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
@@ -204,11 +229,7 @@ class OdibetsScraper {
 
             await fs.writeFile(filename, JSON.stringify({
                 timestamp: new Date().toISOString(),
-                url: this.baseUrl,
-                stats: {
-                    siteShows: this.finalVisibleMatches,
-                    extracted: allMatches.length
-                },
+                totalMatches: allMatches.length,
                 matches: allMatches
             }, null, 2));
 
@@ -224,21 +245,20 @@ class OdibetsScraper {
             await fs.writeFile(csvFilename, csvContent);
             console.log(`💾 Saved ${allMatches.length} matches to ${csvFilename}`);
 
-            console.log('\n' + '='.repeat(80));
-            console.log('📊 SCRAPING COMPLETE');
-            console.log('='.repeat(80));
-            console.log(`📊 Initial matches: ${initialCount}`);
-            console.log(`📊 Final matches: ${allMatches.length}`);
-            console.log(`📊 Site shows: ${this.finalVisibleMatches} matches`);
+            console.log(`\n⏱️  Total time: ${Math.round((Date.now() - this.startTime)/1000)} seconds`);
 
         } catch (error) {
             console.error('❌ Error:', error);
         } finally {
-            await this.delay(5000);
+            await this.delay(2000);
             await this.browser.close();
         }
     }
 }
 
 // Run the scraper
-new OdibetsScraper().run().catch(console.error);
+if (require.main === module) {
+    new OdibetsScraper().run().catch(console.error);
+}
+
+module.exports = { OdibetsScraper };

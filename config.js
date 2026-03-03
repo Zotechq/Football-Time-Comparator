@@ -1,0 +1,7 @@
+// config.json
+{
+    "telegram": {
+    "botToken": "YOUR_BOT_TOKEN_HERE",
+        "chatId": "YOUR_CHAT_ID_HERE"
+}
+}

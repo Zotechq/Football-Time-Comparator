@@ -1,0 +1,1582 @@
+[
+  {
+    "timestamp": "2026-02-27T14:42:56.458Z",
+    "conflicts": [
+      {
+        "home": "Slaven Belupo",
+        "away": "Istra 1961",
+        "times": {
+          "Flashscore": "20:00",
+          "Betika": "23:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.411Z"
+      },
+      {
+        "home": "Dukla Prague",
+        "away": "Slavia Prague",
+        "times": {
+          "Flashscore": "20:00",
+          "Odibets": "20:00",
+          "Betika": "23:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.411Z"
+      },
+      {
+        "home": "Dusseldorf",
+        "away": "Bochum",
+        "times": {
+          "Flashscore": "20:30",
+          "Betika": "23:30"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.411Z"
+      },
+      {
+        "home": "Magesi",
+        "away": "Polokwane",
+        "times": {
+          "Flashscore": "20:30",
+          "Odibets": "20:30",
+          "Betika": "23:30"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.411Z"
+      },
+      {
+        "home": "Stellenbosch",
+        "away": "AmaZulu",
+        "times": {
+          "Flashscore": "20:30",
+          "Odibets": "20:30",
+          "Betika": "23:30"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.411Z"
+      },
+      {
+        "home": "Gleisdorf",
+        "away": "Oedt",
+        "times": {
+          "Flashscore": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Eilenburg",
+        "away": "Jena",
+        "times": {
+          "Flashscore": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Grotta",
+        "away": "Volsungur",
+        "times": {
+          "Flashscore": "21:00",
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Binga",
+        "away": "US Bougouni",
+        "times": {
+          "Flashscore": "21:00",
+          "Odibets": "21:00",
+          "Betika": "22:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Clermont",
+        "away": "Dunkerque",
+        "times": {
+          "Flashscore": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Grenoble",
+        "away": "Boulogne",
+        "times": {
+          "Flashscore": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Montpellier",
+        "away": "Reims",
+        "times": {
+          "Flashscore": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "Jerash",
+        "away": "Al Entesar",
+        "times": {
+          "Flashscore": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.412Z"
+      },
+      {
+        "home": "La Viena",
+        "away": "Dayrout",
+        "times": {
+          "Flashscore": "22:30",
+          "Odibets": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Albacete",
+        "away": "Almeria",
+        "times": {
+          "Flashscore": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Strasbourg",
+        "away": "Lens",
+        "times": {
+          "Flashscore": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Parma",
+        "away": "Cagliari",
+        "times": {
+          "Flashscore": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Harrogate",
+        "away": "Cheltenham",
+        "times": {
+          "Flashscore": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Cobh Ramblers",
+        "away": "Finn Harps",
+        "times": {
+          "Flashscore": "22:45",
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Baglan Dragons",
+        "away": "Cwmbran Celtic",
+        "times": {
+          "Flashscore": "22:45",
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Wolves",
+        "away": "Aston Villa",
+        "times": {
+          "Flashscore": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.413Z"
+      },
+      {
+        "home": "Levante",
+        "away": "Alaves",
+        "times": {
+          "Flashscore": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "Bristol City",
+        "away": "Watford",
+        "times": {
+          "Flashscore": "23:00",
+          "Odibets": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "Tenerife",
+        "away": "Real Aviles",
+        "times": {
+          "Flashscore": "23:15",
+          "Betika": "02:15"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "KV Kortrijk",
+        "away": "RFC Liege",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "SC Telstar",
+        "away": "NAC Breda",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "Standard Liege",
+        "away": "RAAL La Louviere",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "Hobro IK",
+        "away": "HB Koege",
+        "times": {
+          "Odibets": "20:00",
+          "Betika": "23:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.414Z"
+      },
+      {
+        "home": "B93 Copenhagen",
+        "away": "Hvidovre IF",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "Lyngby BK",
+        "away": "Kolding IF",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "Aalborg BK",
+        "away": "Hillerod Fodbold",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "FC Porto",
+        "away": "FC Arouca",
+        "times": {
+          "Odibets": "21:45",
+          "Betika": "00:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "AC Monza",
+        "away": "Virtus Entella",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "ADO Den Haag",
+        "away": "VVV Venlo",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "FC Emmen",
+        "away": "Willem II Tilburg",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.415Z"
+      },
+      {
+        "home": "Jong FC Utrecht",
+        "away": "Almere City FC",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "MVV Maastricht",
+        "away": "De Graafschap",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "RKC Waalwijk",
+        "away": "FC Eindhoven",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "TOP Oss",
+        "away": "SC Cambuur",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "Vitesse Arnhem",
+        "away": "Jong AZ Alkmaar",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "SKN St Polten",
+        "away": "SKU Amstetten",
+        "times": {
+          "Odibets": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "SV Oberwart",
+        "away": "SR Donaufeld",
+        "times": {
+          "Odibets": "21:30",
+          "Betika": "00:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "SV Lafnitz",
+        "away": "Atus Velden",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "LB Chateauroux",
+        "away": "Paris 13 Atletico",
+        "times": {
+          "Odibets": "21:30",
+          "Betika": "00:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "FC Fleury 91",
+        "away": "US Concarneau",
+        "times": {
+          "Odibets": "21:30",
+          "Betika": "00:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.416Z"
+      },
+      {
+        "home": "Debreceni VSC",
+        "away": "MTK Budapest",
+        "times": {
+          "Odibets": "22:15",
+          "Betika": "01:15"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Bohemians Dublin FC",
+        "away": "Shamrock Rovers",
+        "times": {
+          "Odibets": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Derry City FC",
+        "away": "Waterford FC",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Galway United FC",
+        "away": "Sligo Rovers FC",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Athlone Town AFC",
+        "away": "Wexford FC",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Kerry FC",
+        "away": "Longford Town FC",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "MKS Arka Gdynia",
+        "away": "KS Lechia Gdansk",
+        "times": {
+          "Odibets": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.417Z"
+      },
+      {
+        "home": "Pogon Siedlce",
+        "away": "Gornik Leczna",
+        "times": {
+          "Odibets": "20:00",
+          "Betika": "23:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "ZKS Stal Rzeszow",
+        "away": "Ruch Chorzow",
+        "times": {
+          "Odibets": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "PFC Slavia Sofia",
+        "away": "FC CSKA 1948",
+        "times": {
+          "Odibets": "18:45",
+          "Betika": "21:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "Bala Town FC",
+        "away": "Llanelli Town",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "Vllaznia Shkoder",
+        "away": "KF Tirana",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "Umm-Salal SC",
+        "away": "AL Wakrah SC",
+        "times": {
+          "Odibets": "21:30",
+          "Betika": "00:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "Al Ahli Doha SC",
+        "away": "Al Shahaniya",
+        "times": {
+          "Odibets": "21:30",
+          "Betika": "00:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.418Z"
+      },
+      {
+        "home": "Al-Hazm",
+        "away": "Al-Ittifaq FC",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.419Z"
+      },
+      {
+        "home": "Al-Shabab FC (SA)",
+        "away": "Al Hilal SFC",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "AL Bataeh (UAE)",
+        "away": "Baniyas Club",
+        "times": {
+          "Odibets": "20:30",
+          "Betika": "23:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "Khor Fakkan Club",
+        "away": "Al Ain FC",
+        "times": {
+          "Odibets": "20:30",
+          "Betika": "23:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "Jeugd Lommel SK",
+        "away": "RFC Seraing",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "Fulham FC",
+        "away": "Burnley FC",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "Keflavik IF",
+        "away": "KF Aegir",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.420Z"
+      },
+      {
+        "home": "Fylkir Reykjavik",
+        "away": "FH Hafnarfjordur",
+        "times": {
+          "Odibets": "22:00",
+          "Betika": "01:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "AL-Khaldiya SC",
+        "away": "Aali",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "Gaborone United",
+        "away": "Extension Gunners",
+        "times": {
+          "Odibets": "20:00",
+          "Betika": "23:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "AS Cittadella",
+        "away": "ACD Ospitaletto",
+        "times": {
+          "Odibets": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "AS Giana Erminio",
+        "away": "Pro Vercelli 1892",
+        "times": {
+          "Odibets": "22:30",
+          "Betika": "01:30"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "Flint Mountain",
+        "away": "Newtown AFC",
+        "times": {
+          "Odibets": "23:00",
+          "Betika": "02:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.421Z"
+      },
+      {
+        "home": "Holywell Town",
+        "away": "Denbigh Town",
+        "times": {
+          "Odibets": "22:45",
+          "Betika": "01:45"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.422Z"
+      },
+      {
+        "home": "CD Lugo",
+        "away": "Athletic Bilbao B",
+        "times": {
+          "Odibets": "21:00",
+          "Betika": "00:00"
+        },
+        "date": "27/02",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:42:56.422Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-02-27T14:50:50.339Z",
+    "conflicts": [
+      {
+        "home": "Binga",
+        "away": "US Bougouni",
+        "times": {
+          "Flashscore": "21:00",
+          "Odibets": "21:00",
+          "Betika": "19:00",
+          "BetikaEAT": "22:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T14:50:50.314Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-02-27T15:00:06.240Z",
+    "conflicts": [
+      {
+        "home": "Binga",
+        "away": "US Bougouni",
+        "times": {
+          "Flashscore": "21:00",
+          "Odibets": "19:00",
+          "Betika": "19:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T15:00:06.205Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-02-27T15:18:02.100Z",
+    "conflicts": [
+      {
+        "home": "Binga",
+        "away": "US Bougouni",
+        "times": {
+          "Flashscore": "21:00",
+          "Betika": "19:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T15:18:02.068Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-02-27T15:38:05.200Z",
+    "conflicts": [
+      {
+        "home": "Binga",
+        "away": "US Bougouni",
+        "times": {
+          "Flashscore": "21:00",
+          "Betika": "19:00"
+        },
+        "date": "",
+        "sources": [
+          "Flashscore",
+          "Betika"
+        ],
+        "timestamp": "2026-02-27T15:38:05.172Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-02-28T10:53:24.264Z",
+    "conflicts": [
+      {
+        "home": "Bournemouth",
+        "away": "Sunderland",
+        "times": {
+          "Betika": "15:30",
+          "Sofascore": "18:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.224Z"
+      },
+      {
+        "home": "Liverpool",
+        "away": "West Ham",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Burnley",
+        "away": "Brentford",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Newcastle",
+        "away": "Everton",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Barcelona",
+        "away": "Villarreal",
+        "times": {
+          "Betika": "18:15",
+          "Sofascore": "21:15"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Hellas Verona",
+        "away": "Napoli",
+        "times": {
+          "Betika": "20:00",
+          "Sofascore": "23:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Coventry",
+        "away": "Stoke",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Motherwell Fc",
+        "away": "Dundee United",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Lincoln City",
+        "away": "Blackpool",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.225Z"
+      },
+      {
+        "home": "Glentoran Fc",
+        "away": "Crusaders Fc",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Melaka Fc",
+        "away": "Selangor Fc",
+        "times": {
+          "Betika": "17:00",
+          "Sofascore": "20:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Mallorca",
+        "away": "Real Sociedad",
+        "times": {
+          "Betika": "20:30",
+          "Sofascore": "23:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Galatasaray",
+        "away": "Alanyaspor",
+        "times": {
+          "Betika": "20:00",
+          "Sofascore": "23:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Nec Nijmegen",
+        "away": "Fortuna Sittard",
+        "times": {
+          "Betika": "23:00",
+          "Sofascore": "02:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Al-Fayha Fc",
+        "away": "Al-Nassr Fc",
+        "times": {
+          "Betika": "22:00",
+          "Sofascore": "01:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Carabobo Fc",
+        "away": "Caracas Fc",
+        "times": {
+          "Betika": "01:30",
+          "Sofascore": "04:30"
+        },
+        "date": "01/03",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Portsmouth",
+        "away": "Hull City",
+        "times": {
+          "Betika": "15:30",
+          "Sofascore": "18:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.226Z"
+      },
+      {
+        "home": "Leicester",
+        "away": "Norwich",
+        "times": {
+          "Betika": "15:30",
+          "Sofascore": "18:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Sc Heerenveen",
+        "away": "Sparta Rotterdam",
+        "times": {
+          "Betika": "18:30",
+          "Sofascore": "21:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Falkirk Fc",
+        "away": "Kilmarnock Fc",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Livingston Fc",
+        "away": "St Mirren Fc",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Dundee Fc",
+        "away": "Hibernian Fc",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Fc Thun",
+        "away": "Fc Luzern",
+        "times": {
+          "Betika": "20:00",
+          "Sofascore": "23:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Leyton Orient",
+        "away": "Barnsley",
+        "times": {
+          "Betika": "15:30",
+          "Sofascore": "18:30"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Reading",
+        "away": "Bradford City",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      },
+      {
+        "home": "Stevenage",
+        "away": "Stockport County ...",
+        "times": {
+          "Betika": "18:00",
+          "Sofascore": "21:00"
+        },
+        "date": "28/02",
+        "sources": [
+          "Betika",
+          "Sofascore"
+        ],
+        "timestamp": "2026-02-28T10:53:24.227Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-03-01T03:18:08.651Z",
+    "conflicts": [
+      {
+        "home": "Kenya Police FC",
+        "away": "Bandari FC",
+        "times": {
+          "Odibets": "14:00",
+          "Betika": "13:00"
+        },
+        "date": "01/03",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-03-01T03:18:08.641Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-03-01T03:54:52.356Z",
+    "conflicts": [
+      {
+        "home": "Kenya Police FC",
+        "away": "Bandari FC",
+        "times": {
+          "Odibets": "14:00",
+          "Betika": "13:00"
+        },
+        "date": "01/03",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-03-01T03:54:52.326Z"
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-03-01T04:22:00.158Z",
+    "conflicts": [
+      {
+        "home": "Fulham FC",
+        "away": "Tottenham Hotspur",
+        "times": {
+          "Odibets": "17:00",
+          "Betika": "13:00"
+        },
+        "date": "01/03",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-03-01T04:22:00.143Z"
+      },
+      {
+        "home": "Kenya Police FC",
+        "away": "Bandari FC",
+        "times": {
+          "Odibets": "14:00",
+          "Betika": "13:00"
+        },
+        "date": "01/03",
+        "sources": [
+          "Odibets",
+          "Betika"
+        ],
+        "timestamp": "2026-03-01T04:22:00.144Z"
+      }
+    ]
+  }
+]
