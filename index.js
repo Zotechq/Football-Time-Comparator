@@ -1,10 +1,9 @@
-// index.js - WITH TELEGRAM INTEGRATION
+// index.js - COMPARING FLASHSCORE vs ODIBETS ONLY
 const fs = require('fs').promises;
 const readline = require('readline');
 const { exec } = require('child_process');
 const util = require('util');
 const path = require('path');
-const TelegramBot = require('./telegram_bot');
 
 const execPromise = util.promisify(exec);
 
@@ -17,20 +16,6 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 
 // Debug mode - set to true to see normalization details
 const DEBUG_NORMALIZATION = true;
-
-// Initialize Telegram bot
-const telegramBot = new TelegramBot();
-let botEnabled = false;
-
-// Track already alerted conflicts to avoid duplicates
-const alertedConflicts = new Set();
-
-/**
- * Generate a unique ID for a conflict to avoid duplicate alerts
- */
-function generateConflictId(conflict) {
-    return `${conflict.home}|${conflict.away}|${conflict.date}|${conflict.flashscore}|${conflict.odibets}`;
-}
 
 /**
  * Check if a file exists
@@ -415,7 +400,6 @@ function compareFlashscoreAndOdibets(flashscoreMatches, odibetsMatches) {
                     date: flashscoreMatch.date || odibetsMatch.date,
                     league: flashscoreMatch.league || odibetsMatch.league,
                     sources: sources,
-                    difference: calculateTimeDifference(flashscoreMatch.time, odibetsMatch.time),
                     timestamp: new Date().toISOString()
                 };
                 discrepancies.push(conflict);
@@ -427,7 +411,9 @@ function compareFlashscoreAndOdibets(flashscoreMatches, odibetsMatches) {
                 console.log(`Date: ${flashscoreMatch.date || odibetsMatch.date || 'Unknown'}`);
                 console.log(`   Flashscore (EAT): ${flashscoreMatch.time}`);
                 console.log(`   Odibets (EAT): ${odibetsMatch.time}`);
-                console.log(`   Difference: ${conflict.difference} minutes`);
+
+                const diff = calculateTimeDifference(flashscoreMatch.time, odibetsMatch.time);
+                console.log(`   Difference: ${diff} minutes`);
                 console.log('!'.repeat(70));
             } else {
                 matched.push(key);
@@ -487,26 +473,6 @@ async function saveDiscrepancies(discrepancies) {
 }
 
 /**
- * Send Telegram alerts for new conflicts
- */
-async function sendTelegramAlerts(discrepancies) {
-    if (!botEnabled || discrepancies.length === 0) return;
-
-    for (const conflict of discrepancies) {
-        const conflictId = generateConflictId(conflict);
-
-        // Only send alert if we haven't alerted this conflict before
-        if (!alertedConflicts.has(conflictId)) {
-            const sent = await telegramBot.sendConflictAlert(conflict);
-            if (sent) {
-                alertedConflicts.add(conflictId);
-                console.log(`📱 Telegram alert sent for ${conflict.home} vs ${conflict.away}`);
-            }
-        }
-    }
-}
-
-/**
  * Print summary
  */
 function printSummary(flashscoreCount, odibetsCount, discrepancies) {
@@ -527,7 +493,6 @@ function printSummary(flashscoreCount, odibetsCount, discrepancies) {
             console.log(`      League: ${d.league || 'Unknown'}`);
             console.log(`      Flashscore (EAT): ${d.flashscore}`);
             console.log(`      Odibets (EAT): ${d.odibets}`);
-            console.log(`      Difference: ${d.difference} minutes`);
         });
     } else {
         console.log('\n✅ All kickoff times match between Flashscore and Odibets!');
@@ -578,9 +543,6 @@ async function quickTest() {
     if (flashscoreMatches.length > 0 || odibetsMatches.length > 0) {
         discrepancies = compareFlashscoreAndOdibets(flashscoreMatches, odibetsMatches);
 
-        // Send Telegram alerts for new conflicts
-        await sendTelegramAlerts(discrepancies);
-
         printSummary(
             flashscoreMatches.length,
             odibetsMatches.length,
@@ -589,15 +551,6 @@ async function quickTest() {
 
         if (discrepancies.length > 0) {
             await saveDiscrepancies(discrepancies);
-
-            // Send summary to Telegram
-            if (botEnabled) {
-                await telegramBot.sendSummaryAlert({
-                    flashscoreCount: flashscoreMatches.length,
-                    odibetsCount: odibetsMatches.length,
-                    discrepancies
-                });
-            }
         }
     } else {
         console.log('\n❌ No data from any source');
@@ -666,10 +619,6 @@ async function cleanupOldFiles() {
 async function main() {
     console.log('\n⚽ KICKOFF TIME COMPARISON - FLASHSCORE vs ODIBETS');
     console.log('='.repeat(70));
-
-    // Load Telegram configuration
-    botEnabled = await telegramBot.loadConfig();
-
     console.log('1. Run once (quick test)');
     console.log('2. Run continuously (custom interval)');
 
