@@ -1,19 +1,43 @@
 // telegramBot.js
 const https = require('https');
+const fs = require('fs').promises;
+const path = require('path');
 
 class TelegramBot {
-    constructor(botToken, chatId) {
-        this.botToken = botToken;
-        this.chatId = chatId;
-        this.apiUrl = `https://api.telegram.org/bot${botToken}`;
+    constructor() {
+        this.botToken = null;
+        this.chatId = null;
+        this.enabled = false;
+        this.configPath = path.join(__dirname, 'config.json');
     }
 
-    /**
-     * Send a message to Telegram
-     */
+    async loadConfig() {
+        try {
+            const configData = await fs.readFile(this.configPath, 'utf8');
+            const config = JSON.parse(configData);
+
+            if (config.telegram && config.telegram.botToken && config.telegram.chatId) {
+                this.botToken = config.telegram.botToken;
+                this.chatId = config.telegram.chatId;
+                this.enabled = true;
+                console.log('✅ Telegram bot configured');
+                return true;
+            } else {
+                console.log('⚠️ Telegram credentials not found in config');
+                return false;
+            }
+        } catch (error) {
+            console.log('⚠️ No config.json found or invalid format. Telegram alerts disabled.');
+            return false;
+        }
+    }
+
     async sendMessage(message) {
-        return new Promise((resolve, reject) => {
-            const url = `${this.apiUrl}/sendMessage`;
+        if (!this.enabled) return false;
+
+        return new Promise((resolve) => {
+            const url = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
+
             const postData = JSON.stringify({
                 chat_id: this.chatId,
                 text: message,
@@ -37,7 +61,7 @@ class TelegramBot {
                         if (response.ok) {
                             resolve(true);
                         } else {
-                            console.log('❌ Telegram API error:', response);
+                            console.log('❌ Telegram API error:', response.description);
                             resolve(false);
                         }
                     } catch (e) {
@@ -56,70 +80,62 @@ class TelegramBot {
         });
     }
 
-    /**
-     * Format conflict message for Telegram
-     */
     formatConflictMessage(conflict) {
-        const timesList = [];
-
-        if (conflict.times.Flashscore) {
-            timesList.push(`🔵 Flashscore: <b>${conflict.times.Flashscore} EAT</b>`);
-        }
-        if (conflict.times.Odibets) {
-            timesList.push(`🟠 Odibets: <b>${conflict.times.Odibets} EAT</b>`);
-        }
-        if (conflict.times.Betika) {
-            timesList.push(`🟢 Betika: <b>${conflict.times.Betika} GMT</b>`);
-        }
+        const date = new Date().toLocaleString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            dateStyle: 'full',
+            timeStyle: 'medium'
+        });
 
         return `
 🚨 <b>TIME CONFLICT DETECTED!</b>
 
 ⚽ <b>${conflict.home} vs ${conflict.away}</b>
 📅 Date: ${conflict.date || 'Unknown'}
-🔍 Sources: ${conflict.sources.join(', ')}
+🏆 League: ${conflict.league || 'Unknown'}
 
-${timesList.join('\n')}
+⏰ Times:
+   🔵 Flashscore (EAT): <b>${conflict.flashscore}</b>
+   🟠 Odibets (EAT): <b>${conflict.odibets}</b>
+   ⏱️ Difference: <b>${conflict.difference} minutes</b>
 
-⏰ Detected: ${new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}
+📊 <i>${conflict.sources.join(' & ')}</i>
+⏱️ Detected: ${date}
 `;
     }
 
-    /**
-     * Send conflict alert
-     */
     async sendConflictAlert(conflict) {
-        if (!this.botToken || !this.chatId) {
-            console.log('⚠️ Telegram bot not configured');
-            return false;
-        }
+        if (!this.enabled) return false;
 
         const message = this.formatConflictMessage(conflict);
         return await this.sendMessage(message);
     }
 
-    /**
-     * Send summary alert
-     */
-    async sendSummaryAlert(flashscoreCount, odibetsCount, betikaCount, conflicts) {
-        if (!this.botToken || !this.chatId) return false;
+    async sendSummaryAlert(stats) {
+        if (!this.enabled) return false;
 
-        const summaryMessage = `
+        const date = new Date().toLocaleString('en-KE', {
+            timeZone: 'Africa/Nairobi',
+            dateStyle: 'full',
+            timeStyle: 'medium'
+        });
+
+        const message = `
 📊 <b>KICKOFF TIME COMPARISON SUMMARY</b>
 
-📈 Flashscore: ${flashscoreCount} matches
-📈 Odibets: ${odibetsCount} matches
-📈 Betika: ${betikaCount} matches
-📊 TOTAL: ${flashscoreCount + odibetsCount + betikaCount} matches
+📈 Flashscore: ${stats.flashscoreCount} matches
+📈 Odibets: ${stats.odibetsCount} matches
+📊 TOTAL: ${stats.flashscoreCount + stats.odibetsCount} matches
 
-🚨 Conflicts found: <b>${conflicts.length}</b>
+🚨 Conflicts found: <b>${stats.discrepancies.length}</b>
 
-${conflicts.length > 0 ? '⚠️ Check /conflicts for details' : '✅ All times match!'}
+${stats.discrepancies.length > 0
+            ? '⚠️ Check /conflicts for details'
+            : '✅ All times match!'}
 
-⏰ ${new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}
+⏱️ ${date}
 `;
-
-        return await this.sendMessage(summaryMessage);
+        return await this.sendMessage(message);
     }
 }
 
