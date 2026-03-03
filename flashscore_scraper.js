@@ -22,9 +22,22 @@ class FlashscoreScraper {
         // Create data directory if it doesn't exist
         await fs.mkdir(this.dataDir, { recursive: true });
 
+        // 👇 ADD THIS DETECTION CODE
+        // Check if running in Docker/Render (via environment variable)
+        const isProduction = process.env.NODE_ENV === 'production' ||
+            process.env.RENDER === 'true' ||
+            process.env.RUNNING_IN_DOCKER === 'true';
+
         this.browser = await puppeteer.launch({
-            headless: false,
-            defaultViewport: { width: 1280, height: 800 }
+            // 👇 Use headless mode in production, visible mode locally
+            headless: isProduction ? true : false,
+            defaultViewport: { width: 1280, height: 800 },
+            args: isProduction ? [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu'
+            ] : []  // No extra args locally
         });
 
         this.page = await this.browser.newPage();

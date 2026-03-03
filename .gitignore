@@ -1,9 +1,10 @@
 # Dependencies
 node_modules/
 package-lock.json
-config.json
+
 
 # Environment files
+config.json
 .env
 *.local
 
