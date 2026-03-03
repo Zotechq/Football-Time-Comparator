@@ -35,4 +35,5 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 VOLUME [ "/app/data" ]
 
-CMD ["node", "index.js"]
+# 👈 THIS IS THE ONLY LINE THAT CHANGED
+CMD ["node", "web-app.js"]
