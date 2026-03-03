@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  football-comparator:
+    build: .
+    container_name: football-time-comparator
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./config.json:/app/config.json
+    environment:
+      - TZ=Africa/Nairobi
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    stdin_open: true
+    tty: true
+    network_mode: host
+    deploy:
+      resources:
+        limits:
+          memory: 2G
