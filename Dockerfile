@@ -24,16 +24,26 @@ COPY . .
 # Create data directories
 RUN mkdir -p data/flashscore/history data/odibets/history
 
-# Create non-root user
+# ✅ FIX: Create user with proper home directory and permissions
 RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && mkdir -p /home/pptruser/Downloads \
+    && mkdir -p /home/pptruser/.local/share/applications \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser /app \
     && chown -R pptruser:pptruser /app/data
 
+# Switch to non-root user
 USER pptruser
 
+# ✅ FIX: Set home directory environment variable
+ENV HOME=/home/pptruser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV CHROME_DEVEL_SANDBOX=/usr/local/sbin/chrome-devel-sandbox
+
+# Create a simple sandbox workaround (optional but helps with permissions)
+RUN sudo /usr/sbin/setcap 'cap_net_bind_service=+ep' $(which node) 2>/dev/null || true
 
 VOLUME [ "/app/data" ]
 
-# 👈 THIS IS THE ONLY LINE THAT CHANGED
 CMD ["node", "web-app.js"]
