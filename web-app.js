@@ -1,8 +1,9 @@
-// web-app.js - Super simple web dashboard with 30-minute scraper interval
+// web-app.js - Super simple web dashboard with 30-minute scraper interval and wake-up checks
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 const cron = require('node-cron');
+const os = require('os');
 
 // Import your scrapers
 const FlashscoreScraper = require('./flashscore_scraper');
@@ -10,6 +11,9 @@ const OdibetsScraper = require('./odibets_scraper');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// Track when the app started
+const START_TIME = Date.now();
 
 // Global error handlers to catch any crash
 process.on('uncaughtException', (err) => {
@@ -36,50 +40,50 @@ async function ensureFiles() {
     }
 }
 
-// Function to run all scrapers
-async function runScrapers() {
-    if (isRunning) {
-        console.log('⚠️ Scrapers already running, skipping this scheduled run...');
-        return;
-    }
-
-    isRunning = true;
-    console.log('🔄 Starting scrapers at', new Date().toLocaleString());
-
-    try {
-        // Run Flashscore scraper
-        console.log('📊 Running Flashscore scraper...');
-        const flashscore = new FlashscoreScraper();
-        await flashscore.init();
-        await flashscore.navigateToScheduled();
-        await flashscore.expandAllSections();
-        const flashMatches = await flashscore.extractAllMatches();
-        await flashscore.browser.close();
-        console.log(`✅ Flashscore found ${flashMatches.length} matches`);
-
-        // Add delay between scrapers to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-        // Run Odibets scraper
-        console.log('📊 Running Odibets scraper...');
-        const odibets = new OdibetsScraper();
-        await odibets.init();
-        await odibets.navigateToSoccer();
-        await odibets.expandLeaguesInBatches();
-        const odiMatches = await odibets.extractAllMatches();
-        await odibets.browser.close();
-        console.log(`✅ Odibets found ${odiMatches.length} matches`);
-
-        // Here you would add your conflict detection logic
-        // and update conflict_log.json
-
-        console.log('✅ All scrapers completed successfully at', new Date().toLocaleString());
-    } catch (error) {
-        console.error('❌ Error running scrapers:', error);
-    } finally {
-        isRunning = false;
-    }
+// Function to log system info (helpful for debugging)
+function logSystemInfo() {
+    console.log('🖥️ System Info:');
+    console.log(`   - Hostname: ${os.hostname()}`);
+    console.log(`   - Platform: ${os.platform()} ${os.release()}`);
+    console.log(`   - Memory: ${Math.round(os.freemem() / 1024 / 1024)}MB free / ${Math.round(os.totalmem() / 1024 / 1024)}MB total`);
+    console.log(`   - CPUs: ${os.cpus().length}`);
+    console.log(`   - Uptime: ${Math.round(os.uptime() / 60)} minutes`);
 }
+
+// Wake-up check function - logs every time the app handles a request
+app.use((req, res, next) => {
+    const now = new Date();
+    const uptime = Math.round((Date.now() - START_TIME) / 1000);
+
+    console.log(`🔔 WAKE-UP CHECK [${now.toISOString()}]`);
+    console.log(`   - Request: ${req.method} ${req.url}`);
+    console.log(`   - App Uptime: ${uptime} seconds`);
+    console.log(`   - Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB used`);
+
+    // Check if app was sleeping (if uptime is low, it just woke up)
+    if (uptime < 60) {
+        console.log(`   ⚠️ App just started/woke up ${uptime} seconds ago`);
+    }
+
+    next();
+});
+
+// Health check endpoint (for uptime monitoring)
+app.get('/health', (req, res) => {
+    const uptime = process.uptime();
+    const uptimeHours = Math.floor(uptime / 3600);
+    const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+    const uptimeSeconds = Math.floor(uptime % 60);
+
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: `${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`,
+        uptimeSeconds: uptime,
+        memory: process.memoryUsage(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
 
 // Serve a simple HTML page
 app.get('/', async (req, res) => {
@@ -91,6 +95,13 @@ app.get('/', async (req, res) => {
 
         // Get latest 5 conflicts
         const recentConflicts = conflicts.slice(-5).reverse();
+
+        // Get last scrape time from file stats
+        let lastScrapeTime = 'Never';
+        try {
+            const stats = await fs.stat('./conflict_log.json');
+            lastScrapeTime = stats.mtime.toLocaleString();
+        } catch (e) {}
 
         // Generate HTML
         let html = `
@@ -107,8 +118,10 @@ app.get('/', async (req, res) => {
                 .conflict { border-left: 4px solid #ff4757; padding: 15px; margin: 10px 0; background: #f8f9fa; }
                 .time { color: #ff4757; font-weight: bold; }
                 .footer { color: #666; font-size: 12px; text-align: center; margin-top: 30px; }
+                .footer-small { color: #999; font-size: 10px; margin-top: 5px; }
                 h1 { margin: 0; }
                 .badge { background: #ff4757; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+                .stats { background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px; }
             </style>
         </head>
         <body>
@@ -141,9 +154,18 @@ app.get('/', async (req, res) => {
 
         html += `
                 </div>
+                <div class="card">
+                    <h3>📊 App Status</h3>
+                    <div class="stats">
+                        <p><strong>Last updated:</strong> ${lastScrapeTime}</p>
+                        <p><strong>Scraper schedule:</strong> Every 30 minutes</p>
+                        <p><strong>App uptime:</strong> ${Math.floor(process.uptime() / 60)} minutes</p>
+                        <p><strong>Wake-up checks:</strong> Active (check logs)</p>
+                    </div>
+                </div>
                 <div class="footer">
-                    Last updated: ${new Date().toLocaleString()}<br>
-                    Your scrapers run automatically every <strong>30 minutes</strong>
+                    Your scrapers run automatically every <strong>30 minutes</strong><br>
+                    <span class="footer-small">Wake-up logging enabled - every request is logged</span>
                 </div>
             </div>
         </body>
@@ -170,15 +192,6 @@ app.get('/api/conflicts', async (req, res) => {
     }
 });
 
-// Health check endpoint (for uptime monitoring)
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-
 // Manual trigger endpoint (protected by API key)
 app.get('/run-scrapers', async (req, res) => {
     const apiKey = req.query.key;
@@ -194,8 +207,72 @@ app.get('/run-scrapers', async (req, res) => {
     res.json({ status: 'started', timestamp: new Date().toISOString() });
 });
 
+// Function to run all scrapers
+async function runScrapers() {
+    if (isRunning) {
+        console.log('⚠️ Scrapers already running, skipping this scheduled run...');
+        return;
+    }
+
+    isRunning = true;
+    console.log('🔄 Starting scrapers at', new Date().toLocaleString());
+    console.log('📊 App uptime:', Math.round(process.uptime() / 60), 'minutes');
+
+    try {
+        // Run Flashscore scraper
+        console.log('📊 Running Flashscore scraper...');
+        const flashscore = new FlashscoreScraper();
+        await flashscore.init();
+        await flashscore.navigateToScheduled();
+        await flashscore.expandAllSections();
+        const flashMatches = await flashscore.extractAllMatches();
+        await flashscore.browser.close();
+        console.log(`✅ Flashscore found ${flashMatches.length} matches`);
+
+        // Add delay between scrapers to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Run Odibets scraper
+        console.log('📊 Running Odibets scraper...');
+        const odibets = new OdibetsScraper();
+        await odibets.init();
+        await odibets.navigateToSoccer();
+        await odibets.expandLeaguesInBatches();
+        const odiMatches = await odibets.extractAllMatches();
+        await odibets.browser.close();
+        console.log(`✅ Odibets found ${odiMatches.length} matches`);
+
+        // Here you would add your conflict detection logic
+        // and update conflict_log.json
+
+        console.log('✅ All scrapers completed successfully at', new Date().toLocaleString());
+
+        // Update the conflict_log.json modification time (touches the file)
+        const currentLog = await fs.readFile('./conflict_log.json', 'utf8')
+            .then(data => JSON.parse(data))
+            .catch(() => []);
+        await fs.writeFile('./conflict_log.json', JSON.stringify(currentLog, null, 2));
+
+    } catch (error) {
+        console.error('❌ Error running scrapers:', error);
+    } finally {
+        isRunning = false;
+    }
+}
+
 // Start server with error handling
 async function startServer() {
+    console.log('🚀 APP STARTING UP at', new Date().toISOString());
+    console.log('='.repeat(60));
+
+    logSystemInfo();
+
+    console.log('='.repeat(60));
+    console.log('📋 Environment:');
+    console.log(`   - NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   - PORT: ${PORT}`);
+    console.log(`   - CRON_SECRET: ${process.env.CRON_SECRET ? '✅ Set' : '❌ Not set'}`);
+
     await ensureFiles();
 
     const server = app.listen(PORT, '0.0.0.0')
@@ -208,13 +285,17 @@ async function startServer() {
             process.exit(1);
         })
         .on('listening', () => {
+            console.log('='.repeat(60));
             console.log(`🌐 Web dashboard running at http://0.0.0.0:${PORT}`);
             console.log('✅ Server is running and will stay alive');
+            console.log('🔔 Wake-up logging enabled - every request will be logged');
+            console.log('='.repeat(60));
 
             // Schedule scrapers to run every 30 minutes
             console.log('⏰ Scheduling scrapers to run every 30 minutes');
             cron.schedule('*/30 * * * *', () => {
-                console.log('⏰ Cron trigger at', new Date().toLocaleString());
+                console.log('⏰ CRON TRIGGER at', new Date().toLocaleString());
+                console.log('📊 Current uptime:', Math.round(process.uptime() / 60), 'minutes');
                 runScrapers().catch(console.error);
             });
 
