@@ -6,6 +6,22 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ✅ ADD THIS: Ensure conflict_log.json exists before starting
+async function ensureFiles() {
+    try {
+        // Check if conflict_log.json exists
+        await fs.access('./conflict_log.json');
+        console.log('✅ conflict_log.json exists');
+    } catch {
+        // File doesn't exist, create it with empty array
+        await fs.writeFile('./conflict_log.json', '[]');
+        console.log('✅ Created empty conflict_log.json');
+    }
+}
+
+// Call it before starting the server
+ensureFiles().catch(console.error);
+
 // Serve a simple HTML page
 app.get('/', async (req, res) => {
     try {
@@ -77,16 +93,22 @@ app.get('/', async (req, res) => {
 
         res.send(html);
     } catch (error) {
+        console.error('Error serving homepage:', error);
         res.status(500).send('Error loading data');
     }
 });
 
 // API endpoint for JSON data
 app.get('/api/conflicts', async (req, res) => {
-    const conflicts = await fs.readFile('./conflict_log.json', 'utf8')
-        .then(data => JSON.parse(data))
-        .catch(() => []);
-    res.json(conflicts);
+    try {
+        const conflicts = await fs.readFile('./conflict_log.json', 'utf8')
+            .then(data => JSON.parse(data))
+            .catch(() => []);
+        res.json(conflicts);
+    } catch (error) {
+        console.error('Error serving API:', error);
+        res.status(500).json({ error: 'Failed to load conflicts' });
+    }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
