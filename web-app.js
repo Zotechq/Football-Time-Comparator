@@ -1,39 +1,42 @@
-// web-app.js - Super simple web dashboard
+// web-app.js - Super simple web dashboard with robust error handling
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Global error handlers to catch any crash
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ ADD THIS: Ensure conflict_log.json exists before starting
+// Ensure conflict_log.json exists before starting
 async function ensureFiles() {
     try {
-        // Check if conflict_log.json exists
         await fs.access('./conflict_log.json');
         console.log('✅ conflict_log.json exists');
     } catch {
-        // File doesn't exist, create it with empty array
         await fs.writeFile('./conflict_log.json', '[]');
         console.log('✅ Created empty conflict_log.json');
     }
 }
 
-// Call it before starting the server
-ensureFiles().catch(console.error);
-
 // Serve a simple HTML page
 app.get('/', async (req, res) => {
     try {
-        // Read the latest conflict log
         const conflicts = await fs.readFile('./conflict_log.json', 'utf8')
             .then(data => JSON.parse(data))
             .catch(() => []);
 
-        // Get latest 5 conflicts
         const recentConflicts = conflicts.slice(-5).reverse();
 
-        // Generate HTML
         let html = `
         <!DOCTYPE html>
         <html>
@@ -111,6 +114,26 @@ app.get('/api/conflicts', async (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🌐 Web dashboard running at http://0.0.0.0:${PORT}`);
+// Start server with error handling
+async function startServer() {
+    await ensureFiles();
+
+    const server = app.listen(PORT, '0.0.0.0')
+        .on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.error(`❌ Port ${PORT} is already in use`);
+            } else {
+                console.error('❌ Server error:', err);
+            }
+            process.exit(1);
+        })
+        .on('listening', () => {
+            console.log(`🌐 Web dashboard running at http://0.0.0.0:${PORT}`);
+            console.log('✅ Server is running and will stay alive');
+        });
+}
+
+startServer().catch(err => {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
 });
