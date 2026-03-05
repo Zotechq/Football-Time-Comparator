@@ -1,7 +1,15 @@
-// web-app.js - Super simple web dashboard with robust error handling
+// web-app.js - Super simple web dashboard with 30-minute scraper interval
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
+const cron = require('node-cron');
+
+// Import your scrapers
+const FlashscoreScraper = require('./flashscore_scraper');
+const OdibetsScraper = require('./odibets_scraper');
+
+const app = express();
+const PORT = process.env.PORT || 8080;
 
 // Global error handlers to catch any crash
 process.on('uncaughtException', (err) => {
@@ -14,8 +22,8 @@ process.on('unhandledRejection', (reason, promise) => {
     process.exit(1);
 });
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// Flag to prevent overlapping scraper runs
+let isRunning = false;
 
 // Ensure conflict_log.json exists before starting
 async function ensureFiles() {
@@ -28,15 +36,63 @@ async function ensureFiles() {
     }
 }
 
+// Function to run all scrapers
+async function runScrapers() {
+    if (isRunning) {
+        console.log('⚠️ Scrapers already running, skipping this scheduled run...');
+        return;
+    }
+
+    isRunning = true;
+    console.log('🔄 Starting scrapers at', new Date().toLocaleString());
+
+    try {
+        // Run Flashscore scraper
+        console.log('📊 Running Flashscore scraper...');
+        const flashscore = new FlashscoreScraper();
+        await flashscore.init();
+        await flashscore.navigateToScheduled();
+        await flashscore.expandAllSections();
+        const flashMatches = await flashscore.extractAllMatches();
+        await flashscore.browser.close();
+        console.log(`✅ Flashscore found ${flashMatches.length} matches`);
+
+        // Add delay between scrapers to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Run Odibets scraper
+        console.log('📊 Running Odibets scraper...');
+        const odibets = new OdibetsScraper();
+        await odibets.init();
+        await odibets.navigateToSoccer();
+        await odibets.expandLeaguesInBatches();
+        const odiMatches = await odibets.extractAllMatches();
+        await odibets.browser.close();
+        console.log(`✅ Odibets found ${odiMatches.length} matches`);
+
+        // Here you would add your conflict detection logic
+        // and update conflict_log.json
+
+        console.log('✅ All scrapers completed successfully at', new Date().toLocaleString());
+    } catch (error) {
+        console.error('❌ Error running scrapers:', error);
+    } finally {
+        isRunning = false;
+    }
+}
+
 // Serve a simple HTML page
 app.get('/', async (req, res) => {
     try {
+        // Read the latest conflict log
         const conflicts = await fs.readFile('./conflict_log.json', 'utf8')
             .then(data => JSON.parse(data))
             .catch(() => []);
 
+        // Get latest 5 conflicts
         const recentConflicts = conflicts.slice(-5).reverse();
 
+        // Generate HTML
         let html = `
         <!DOCTYPE html>
         <html>
@@ -87,7 +143,7 @@ app.get('/', async (req, res) => {
                 </div>
                 <div class="footer">
                     Last updated: ${new Date().toLocaleString()}<br>
-                    Your scrapers run automatically every 6 hours
+                    Your scrapers run automatically every <strong>30 minutes</strong>
                 </div>
             </div>
         </body>
@@ -114,6 +170,30 @@ app.get('/api/conflicts', async (req, res) => {
     }
 });
 
+// Health check endpoint (for uptime monitoring)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// Manual trigger endpoint (protected by API key)
+app.get('/run-scrapers', async (req, res) => {
+    const apiKey = req.query.key;
+    if (apiKey !== process.env.CRON_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🔄 Manual scraper run triggered at', new Date().toISOString());
+
+    // Run in background
+    runScrapers().catch(console.error);
+
+    res.json({ status: 'started', timestamp: new Date().toISOString() });
+});
+
 // Start server with error handling
 async function startServer() {
     await ensureFiles();
@@ -130,6 +210,19 @@ async function startServer() {
         .on('listening', () => {
             console.log(`🌐 Web dashboard running at http://0.0.0.0:${PORT}`);
             console.log('✅ Server is running and will stay alive');
+
+            // Schedule scrapers to run every 30 minutes
+            console.log('⏰ Scheduling scrapers to run every 30 minutes');
+            cron.schedule('*/30 * * * *', () => {
+                console.log('⏰ Cron trigger at', new Date().toLocaleString());
+                runScrapers().catch(console.error);
+            });
+
+            // Run scrapers immediately on startup
+            setTimeout(() => {
+                console.log('🔄 Running initial scrapers on startup');
+                runScrapers().catch(console.error);
+            }, 5000);
         });
 }
 
