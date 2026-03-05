@@ -202,6 +202,7 @@ app.get('/run-scrapers', async (req, res) => {
 });
 
 // Function to run all scrapers
+// Function to run all scrapers with retry logic
 async function runScrapers() {
     if (isRunning) {
         console.log('⚠️ Scrapers already running, skipping this scheduled run...');
@@ -213,27 +214,53 @@ async function runScrapers() {
     console.log('📊 App uptime:', Math.round(process.uptime() / 60), 'minutes');
 
     try {
-        // Run Flashscore scraper
+        // Run Flashscore scraper with retry
         console.log('📊 Running Flashscore scraper...');
-        const flashscore = new FlashscoreScraper();
-        await flashscore.init();
-        await flashscore.navigateToScheduled();
-        await flashscore.expandAllSections();
-        const flashMatches = await flashscore.extractAllMatches();
-        await flashscore.browser.close();
-        console.log(`✅ Flashscore found ${flashMatches.length} matches`);
+        let flashscoreSuccess = false;
+        let flashscoreRetries = 3;
+
+        while (!flashscoreSuccess && flashscoreRetries > 0) {
+            try {
+                const flashscore = new FlashscoreScraper();
+                await flashscore.init();
+                await flashscore.navigateToScheduled();
+                await flashscore.expandAllSections();
+                const flashMatches = await flashscore.extractAllMatches();
+                await flashscore.browser.close();
+                console.log(`✅ Flashscore found ${flashMatches.length} matches`);
+                flashscoreSuccess = true;
+            } catch (error) {
+                flashscoreRetries--;
+                console.log(`⚠️ Flashscore attempt failed, ${flashscoreRetries} retries left:`, error.message);
+                if (flashscoreRetries === 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds before retry
+            }
+        }
 
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // Run Odibets scraper
+        // Run Odibets scraper with retry
         console.log('📊 Running Odibets scraper...');
-        const odibets = new OdibetsScraper();
-        await odibets.init();
-        await odibets.navigateToSoccer();
-        await odibets.expandLeaguesInBatches();
-        const odiMatches = await odibets.extractAllMatches();
-        await odibets.browser.close();
-        console.log(`✅ Odibets found ${odiMatches.length} matches`);
+        let odibetsSuccess = false;
+        let odibetsRetries = 3;
+
+        while (!odibetsSuccess && odibetsRetries > 0) {
+            try {
+                const odibets = new OdibetsScraper();
+                await odibets.init();
+                await odibets.navigateToSoccer();
+                await odibets.expandLeaguesInBatches();
+                const odiMatches = await odibets.extractAllMatches();
+                await odibets.browser.close();
+                console.log(`✅ Odibets found ${odiMatches.length} matches`);
+                odibetsSuccess = true;
+            } catch (error) {
+                odibetsRetries--;
+                console.log(`⚠️ Odibets attempt failed, ${odibetsRetries} retries left:`, error.message);
+                if (odibetsRetries === 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds before retry
+            }
+        }
 
         // Update conflict_log.json modification time
         const currentLog = await fs.readFile('./conflict_log.json', 'utf8')

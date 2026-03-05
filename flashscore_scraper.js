@@ -19,28 +19,40 @@ class FlashscoreScraper {
         console.log('⚽ FLASHSCORE MATCH SCRAPER - KENYA TIME');
         console.log('='.repeat(80));
 
-        // Create data directory if it doesn't exist
         await fs.mkdir(this.dataDir, { recursive: true });
 
-        // Check if running in Docker/Render (via environment variable)
         const isProduction = process.env.NODE_ENV === 'production' ||
             process.env.RENDER === 'true' ||
             process.env.RUNNING_IN_DOCKER === 'true';
 
-        this.browser = await puppeteer.launch({
+        const launchOptions = {
             headless: isProduction ? true : false,
             defaultViewport: { width: 1280, height: 800 },
-            args: isProduction ? [
+            args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ] : []
-        });
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--disable-web-security',
+                '--disable-features=VizDisplayCompositor',
+                '--disable-font-subpixel-positioning',
+                '--window-size=1280,800'
+            ],
+            timeout: 60000 // 60 seconds timeout for Chrome launch
+        };
 
+        // Set Chrome path in production
+        if (isProduction) {
+            launchOptions.executablePath = '/usr/bin/google-chrome-stable';
+        }
+
+        this.browser = await puppeteer.launch(launchOptions);
         this.page = await this.browser.newPage();
 
-        // Block new windows
+        // Set default navigation timeout
+        this.page.setDefaultNavigationTimeout(60000); // 60 seconds
+
         await this.page.evaluateOnNewDocument(() => {
             window.open = () => null;
         });
@@ -48,21 +60,31 @@ class FlashscoreScraper {
 
     async navigateToScheduled() {
         console.log('\n📡 Loading page...');
-        await this.page.goto('https://www.flashscore.co.ke/football/');
-        await this.delay(3000);
+        try {
+            // Increase timeout and add waitUntil options
+            await this.page.goto('https://www.flashscore.co.ke/football/', {
+                waitUntil: 'networkidle2',
+                timeout: 60000  // Increase to 60 seconds
+            });
+            console.log('✅ Page loaded');
+            await this.delay(3000);
 
-        console.log('🔍 Clicking SCHEDULED tab...');
-        await this.page.evaluate(() => {
-            const tabs = document.querySelectorAll('div.filters__text');
-            for (let i = 0; i < tabs.length; i++) {
-                if (tabs[i]?.innerText?.includes('SCHEDULED')) {
-                    tabs[i].click();
-                    break;
+            console.log('🔍 Clicking SCHEDULED tab...');
+            await this.page.evaluate(() => {
+                const tabs = document.querySelectorAll('div.filters__text');
+                for (let i = 0; i < tabs.length; i++) {
+                    if (tabs[i]?.innerText?.includes('SCHEDULED')) {
+                        tabs[i].click();
+                        break;
+                    }
                 }
-            }
-        });
+            });
 
-        await this.delay(3000);
+            await this.delay(3000);
+        } catch (error) {
+            console.error('❌ Navigation error:', error.message);
+            throw error;
+        }
     }
 
     async expandAllSections() {

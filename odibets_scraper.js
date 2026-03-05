@@ -19,7 +19,7 @@ class OdibetsScraper {
 
     async init() {
         console.log('='.repeat(80));
-        console.log('⚽ ODIBETS SOCCER MATCH SCRAPER - FIXED LOOP');
+        console.log('⚽ FLASHSCORE MATCH SCRAPER - KENYA TIME');
         console.log('='.repeat(80));
 
         await fs.mkdir(this.dataDir, { recursive: true });
@@ -28,23 +28,37 @@ class OdibetsScraper {
             process.env.RENDER === 'true' ||
             process.env.RUNNING_IN_DOCKER === 'true';
 
-        this.browser = await puppeteer.launch({
+        const launchOptions = {
             headless: isProduction ? true : false,
-            defaultViewport: { width: 1366, height: 768 },
-            args: isProduction ? [
+            defaultViewport: { width: 1280, height: 800 },
+            args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ] : [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-            ]
-        });
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--disable-web-security',
+                '--disable-features=VizDisplayCompositor',
+                '--disable-font-subpixel-positioning',
+                '--window-size=1280,800'
+            ],
+            timeout: 60000 // 60 seconds timeout for Chrome launch
+        };
 
+        // Set Chrome path in production
+        if (isProduction) {
+            launchOptions.executablePath = '/usr/bin/google-chrome-stable';
+        }
+
+        this.browser = await puppeteer.launch(launchOptions);
         this.page = await this.browser.newPage();
-        await this.page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+        // Set default navigation timeout
+        this.page.setDefaultNavigationTimeout(60000); // 60 seconds
+
+        await this.page.evaluateOnNewDocument(() => {
+            window.open = () => null;
+        });
     }
 
     async navigateToSoccer() {
@@ -52,12 +66,13 @@ class OdibetsScraper {
         try {
             await this.page.goto(this.baseUrl, {
                 waitUntil: 'networkidle2',
-                timeout: 60000
+                timeout: 60000  // Increase to 60 seconds
             });
             console.log('✅ Page loaded');
             await this.delay(3000);
         } catch (error) {
             console.log(`⚠️ Navigation warning: ${error.message}`);
+            // Don't throw, try to continue
             await this.delay(3000);
         }
     }
