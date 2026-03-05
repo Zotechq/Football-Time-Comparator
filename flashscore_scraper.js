@@ -22,14 +22,12 @@ class FlashscoreScraper {
         // Create data directory if it doesn't exist
         await fs.mkdir(this.dataDir, { recursive: true });
 
-        // 👇 ADD THIS DETECTION CODE
         // Check if running in Docker/Render (via environment variable)
         const isProduction = process.env.NODE_ENV === 'production' ||
             process.env.RENDER === 'true' ||
             process.env.RUNNING_IN_DOCKER === 'true';
 
         this.browser = await puppeteer.launch({
-            // 👇 Use headless mode in production, visible mode locally
             headless: isProduction ? true : false,
             defaultViewport: { width: 1280, height: 800 },
             args: isProduction ? [
@@ -37,7 +35,7 @@ class FlashscoreScraper {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu'
-            ] : []  // No extra args locally
+            ] : []
         });
 
         this.page = await this.browser.newPage();
@@ -80,7 +78,6 @@ class FlashscoreScraper {
 
             const beforeCount = await this.countMatches();
 
-            // Click all "display matches" buttons
             const clicked = await this.page.evaluate(() => {
                 const buttons = document.querySelectorAll('span.wcl-scores-simple-text-01_-OvnR');
                 let clickCount = 0;
@@ -107,7 +104,6 @@ class FlashscoreScraper {
                 totalExpanded += newMatches;
             }
 
-            // Check if any buttons remain
             const remaining = await this.page.evaluate(() => {
                 return document.querySelectorAll('span.wcl-scores-simple-text-01_-OvnR').length;
             });
@@ -124,19 +120,14 @@ class FlashscoreScraper {
 
     async countMatches() {
         return await this.page.evaluate(() => {
-            // Only count actual match elements, not headers or UI elements
             const matches = document.querySelectorAll('.event__match');
             let count = 0;
 
             matches.forEach(match => {
-                // Skip header rows
                 if (match.className.includes('header')) return;
-
-                // Check if it has time element (real match)
                 const timeEl = match.querySelector('.event__time');
                 if (timeEl) {
                     const time = timeEl.innerText.trim();
-                    // Count only if it has a valid time format (contains colon)
                     if (time.includes(':')) {
                         count++;
                     }
@@ -156,7 +147,6 @@ class FlashscoreScraper {
 
             matchElements.forEach(matchEl => {
                 try {
-                    // Skip header rows
                     if (matchEl.className.includes('header')) return;
 
                     const timeEl = matchEl.querySelector('.event__time');
@@ -168,8 +158,6 @@ class FlashscoreScraper {
                         const home = homeEl.innerText.trim();
                         const away = awayEl.innerText.trim();
 
-                        // Only include matches with valid time format (HH:MM)
-                        // AND ensure it doesn't have "FRO" or other finished match indicators
                         if (time.includes(':') &&
                             !time.includes('FRO') &&
                             !time.includes('FT') &&
@@ -201,25 +189,21 @@ class FlashscoreScraper {
         console.log('📊 SCHEDULED MATCHES (Kenya Time - EAT)');
         console.log('='.repeat(80));
 
-        // Sort by time (original time from website - already Kenya time)
         const sorted = [...matches].sort((a, b) => a.time.localeCompare(b.time));
-
-        // Group by hour
         const byHour = {};
+
         sorted.forEach(m => {
             const hour = m.time.split(':')[0];
             if (!byHour[hour]) byHour[hour] = [];
             byHour[hour].push(m);
         });
 
-        // Display with counts per hour
         const hours = Object.keys(byHour).sort((a, b) => parseInt(a) - parseInt(b));
         hours.forEach(hour => {
             const matchesThisHour = byHour[hour];
             console.log(`\n🕐 ${hour}:00 - ${hour}:59 (${matchesThisHour.length} matches)`);
 
             matchesThisHour.forEach((m, i) => {
-                // Truncate long team names for better alignment
                 const home = m.home.length > 25 ? m.home.substring(0, 22) + '...' : m.home;
                 const away = m.away.length > 25 ? m.away.substring(0, 22) + '...' : m.away;
                 console.log(`   ${(i+1).toString().padStart(2)}. ${home.padEnd(25)} vs ${away.padEnd(25)} @ ${m.time}`);
@@ -228,18 +212,14 @@ class FlashscoreScraper {
 
         console.log('\n' + '='.repeat(80));
         console.log(`📈 TOTAL: ${sorted.length} scheduled matches across ${hours.length} hours`);
-
-        // Add timezone info
         console.log(`⏰ All times are East Africa Time (EAT / UTC+3) - Your local time`);
         console.log(`📍 Source: flashscore.co.ke (Kenyan domain)`);
     }
 
     async saveMatches(matches) {
-        // Sort matches
         const sorted = [...matches].sort((a, b) => a.time.localeCompare(b.time));
-
-        // Group by hour for JSON
         const byHour = {};
+
         sorted.forEach(m => {
             const hour = m.time.split(':')[0];
             if (!byHour[hour]) byHour[hour] = [];
@@ -264,12 +244,10 @@ class FlashscoreScraper {
             allMatches: sorted
         };
 
-        // 1. Save latest version (always overwrites)
         const latestFile = path.join(this.dataDir, 'flashscore_latest.json');
         await fs.writeFile(latestFile, JSON.stringify(data, null, 2));
         console.log(`\n💾 Latest matches saved to ${latestFile}`);
 
-        // 2. Save dated version (for history)
         const date = new Date();
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -282,7 +260,6 @@ class FlashscoreScraper {
         await fs.writeFile(historyFile, JSON.stringify(data, null, 2));
         console.log(`💾 History saved to ${historyFile}`);
 
-        // 3. Clean up old files (older than 7 days)
         await this.cleanupOldFiles();
     }
 
@@ -292,7 +269,6 @@ class FlashscoreScraper {
             const now = Date.now();
             const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
-            // Walk through year/month folders
             const years = await fs.readdir(historyDir).catch(() => []);
 
             for (const year of years) {
@@ -308,7 +284,6 @@ class FlashscoreScraper {
                             const filePath = path.join(monthPath, file);
                             const stats = await fs.stat(filePath);
 
-                            // If file is older than 7 days, delete it
                             if (now - stats.mtimeMs > sevenDays) {
                                 await fs.unlink(filePath);
                                 console.log(`🧹 Deleted old file: ${filePath}`);
@@ -316,7 +291,6 @@ class FlashscoreScraper {
                         }
                     }
 
-                    // Remove empty month folder
                     const remaining = await fs.readdir(monthPath).catch(() => []);
                     if (remaining.length === 0) {
                         await fs.rmdir(monthPath);
@@ -324,7 +298,6 @@ class FlashscoreScraper {
                     }
                 }
 
-                // Remove empty year folder
                 const remainingMonths = await fs.readdir(yearPath).catch(() => []);
                 if (remainingMonths.length === 0) {
                     await fs.rmdir(yearPath);
@@ -332,7 +305,6 @@ class FlashscoreScraper {
                 }
             }
         } catch (error) {
-            // Silently handle cleanup errors (don't crash the program)
             console.log(`⚠️ Cleanup warning: ${error.message}`);
         }
     }
@@ -354,7 +326,6 @@ class FlashscoreScraper {
                 if (timeEl) {
                     const time = timeEl.innerText.trim();
                     if (time.includes(':')) {
-                        // Check if it's a finished match (has FRO, FT, etc.)
                         if (time.includes('FRO') || time.includes('FT') || time.includes('-')) {
                             finished++;
                         } else {
@@ -379,25 +350,19 @@ class FlashscoreScraper {
             await this.init();
             await this.navigateToScheduled();
 
-            // Get initial valid match count
             const initialStats = await this.verifyExtraction();
             console.log(`\n📊 Initially visible scheduled matches: ${initialStats.valid}`);
 
-            // Expand all sections
             const expanded = await this.expandAllSections();
 
-            // Get final valid match count
             const finalStats = await this.verifyExtraction();
             console.log(`\n📊 Final scheduled match count: ${finalStats.valid}`);
 
-            // Extract all matches (filtered)
             const matches = await this.extractAllMatches();
             this.displayMatches(matches);
 
-            // Save matches
             await this.saveMatches(matches);
 
-            // Summary
             console.log('\n' + '='.repeat(80));
             console.log('📊 FINAL SUMMARY');
             console.log('='.repeat(80));
@@ -422,5 +387,10 @@ class FlashscoreScraper {
     }
 }
 
-// Run the scraper
-new FlashscoreScraper().run().catch(console.error);
+// ✅ ADDED: Run the scraper if called directly
+if (require.main === module) {
+    new FlashscoreScraper().run().catch(console.error);
+}
+
+// ✅ ADDED: Export for use in other files
+module.exports = FlashscoreScraper;

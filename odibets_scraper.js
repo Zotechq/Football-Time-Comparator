@@ -22,17 +22,13 @@ class OdibetsScraper {
         console.log('⚽ ODIBETS SOCCER MATCH SCRAPER - FIXED LOOP');
         console.log('='.repeat(80));
 
-        // Create data directory if it doesn't exist
         await fs.mkdir(this.dataDir, { recursive: true });
 
-        // 👇 ADD THIS DETECTION CODE
-        // Check if running in Docker/Render (via environment variable)
         const isProduction = process.env.NODE_ENV === 'production' ||
             process.env.RENDER === 'true' ||
             process.env.RUNNING_IN_DOCKER === 'true';
 
         this.browser = await puppeteer.launch({
-            // 👇 Use headless mode in production, visible mode locally
             headless: isProduction ? true : false,
             defaultViewport: { width: 1366, height: 768 },
             args: isProduction ? [
@@ -40,7 +36,7 @@ class OdibetsScraper {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu'
-            ] : [  // Keep your existing args for local
+            ] : [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
@@ -85,7 +81,7 @@ class OdibetsScraper {
         let noProgressCount = 0;
         const batchSize = 50;
         const waitTime = 2000;
-        const maxBatches = 20; // Safety limit
+        const maxBatches = 20;
 
         while (batchCount < maxBatches) {
             batchCount++;
@@ -101,7 +97,6 @@ class OdibetsScraper {
                     const match = text.match(/(.+?)\s*\((\d+)\)$/);
 
                     if (match && !text.includes('vs') && !text.includes(':')) {
-                        // Check if this league is already expanded
                         let isExpanded = false;
                         let parent = el.parentElement;
                         if (parent) {
@@ -126,23 +121,18 @@ class OdibetsScraper {
 
             totalClicked += clicked;
 
-            // Show progress
             process.stdout.write(`\r   Batch ${batchCount}: Clicked ${clicked} leagues (total: ${totalClicked})`);
 
-            // If no leagues clicked this batch, we're done
             if (clicked === 0) {
                 console.log('\n   ✅ No more leagues to click');
                 break;
             }
 
-            // Wait between batches
             await this.delay(waitTime);
 
-            // Check match count every batch
             const currentMatches = await this.getVisibleMatchCount();
             process.stdout.write(` → ${currentMatches} matches`);
 
-            // Check if matches are still increasing
             if (currentMatches === previousMatchCount) {
                 noProgressCount++;
                 if (noProgressCount >= 3) {
@@ -157,7 +147,6 @@ class OdibetsScraper {
 
         console.log(`\n\n📊 Total leagues clicked: ${totalClicked}`);
 
-        // Final match count
         const finalMatches = await this.getVisibleMatchCount();
         console.log(`📊 Final match count: ${finalMatches}`);
 
@@ -207,19 +196,16 @@ class OdibetsScraper {
     }
 
     async saveMatches(matches) {
-        // Prepare data
         const data = {
             timestamp: new Date().toISOString(),
             totalMatches: matches.length,
             matches: matches
         };
 
-        // 1. Save latest version (always overwrites)
         const latestFile = path.join(this.dataDir, 'odibets_latest.json');
         await fs.writeFile(latestFile, JSON.stringify(data, null, 2));
         console.log(`\n💾 Latest matches saved to ${latestFile}`);
 
-        // 2. Save dated version (for history)
         const date = new Date();
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -232,7 +218,6 @@ class OdibetsScraper {
         await fs.writeFile(historyFile, JSON.stringify(data, null, 2));
         console.log(`💾 History saved to ${historyFile}`);
 
-        // 3. Save CSV version
         const csvFilename = path.join(this.dataDir, `odibets_${year}-${month}-${day}.csv`);
         let csvContent = 'Home Team,Away Team,Kickoff,Date\n';
         matches.forEach(m => {
@@ -241,7 +226,6 @@ class OdibetsScraper {
         await fs.writeFile(csvFilename, csvContent);
         console.log(`💾 CSV saved to ${csvFilename}`);
 
-        // 4. Clean up old files (older than 7 days)
         await this.cleanupOldFiles();
     }
 
@@ -251,11 +235,9 @@ class OdibetsScraper {
             const now = Date.now();
             const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
-            // Check if history directory exists
             const historyExists = await fs.access(historyDir).then(() => true).catch(() => false);
             if (!historyExists) return;
 
-            // Walk through year/month folders
             const years = await fs.readdir(historyDir);
 
             for (const year of years) {
@@ -271,23 +253,19 @@ class OdibetsScraper {
                     if (!monthStat.isDirectory()) continue;
 
                     const files = await fs.readdir(monthPath);
-                    let deletedCount = 0;
 
                     for (const file of files) {
                         if (file.endsWith('.json') || file.endsWith('.csv')) {
                             const filePath = path.join(monthPath, file);
                             const stats = await fs.stat(filePath);
 
-                            // If file is older than 7 days, delete it
                             if (now - stats.mtimeMs > sevenDays) {
                                 await fs.unlink(filePath);
-                                deletedCount++;
                                 console.log(`🧹 Deleted old file: ${filePath}`);
                             }
                         }
                     }
 
-                    // Remove empty month folder
                     const remaining = await fs.readdir(monthPath);
                     if (remaining.length === 0) {
                         await fs.rmdir(monthPath);
@@ -295,7 +273,6 @@ class OdibetsScraper {
                     }
                 }
 
-                // Remove empty year folder
                 const remainingMonths = await fs.readdir(yearPath);
                 if (remainingMonths.length === 0) {
                     await fs.rmdir(yearPath);
@@ -303,7 +280,6 @@ class OdibetsScraper {
                 }
             }
         } catch (error) {
-            // Silently handle cleanup errors (don't crash the program)
             console.log(`⚠️ Cleanup warning: ${error.message}`);
         }
     }
@@ -316,21 +292,16 @@ class OdibetsScraper {
             const initialCount = await this.getVisibleMatchCount();
             console.log(`\n📊 Initially visible matches: ${initialCount}`);
 
-            // Expand leagues
             await this.expandLeaguesInBatches();
 
-            // Short final wait
             await this.delay(3000);
 
-            // Extract matches
             const allMatches = await this.extractAllMatches();
 
-            // Display summary (first 20 matches)
             console.log('\n' + '='.repeat(80));
             console.log(`📋 ODIBETS MATCHES - ${new Date().toLocaleDateString()}`);
             console.log('='.repeat(80));
             console.log(`📊 Total matches: ${allMatches.length}`);
-            console.log('-'.repeat(80));
 
             allMatches.slice(0, 20).forEach((m, i) => {
                 console.log(`${(i+1).toString().padStart(3)}. ${m.home.padEnd(25)} vs ${m.away.padEnd(25)} @ ${m.kickoff} ${m.date}`);
@@ -342,7 +313,6 @@ class OdibetsScraper {
 
             console.log('='.repeat(80));
 
-            // Save matches with organized structure
             await this.saveMatches(allMatches);
 
             console.log(`\n⏱️  Total time: ${Math.round((Date.now() - this.startTime)/1000)} seconds`);
@@ -356,9 +326,10 @@ class OdibetsScraper {
     }
 }
 
-// Run the scraper
+// Run the scraper if called directly
 if (require.main === module) {
     new OdibetsScraper().run().catch(console.error);
 }
 
+// Export for use in other files
 module.exports = { OdibetsScraper };
